@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AskFusion</title>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #001f3f; /* Default Dark Blue */
+      transition: background-color 0.5s ease;
+    }
+
+    /* Glowing Logo */
+    .logo {
+      font-size: 4rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      text-align: center;
+      background: linear-gradient(90deg, #00d4ff, #a100ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 2s infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #00d4ff;
+      }
+      to {
+        text-shadow: 0 0 10px #a100ff, 0 0 20px #a100ff, 0 0 30px #a100ff;
+      }
+    }
+
+    /* Search Bar and Icons */
+    .search-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .search-bar {
+      width: 500px;
+      height: 50px;
+      padding: 10px;
+      font-size: 18px;
+      border-radius: 25px;
+      border: 2px solid #00d4ff;
+      margin-right: 10px;
+      background-color: #1b2a41;
+      color: white;
+    }
+
+    .search-button, .mic-button, .add-button {
+      background-color: #00d4ff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      margin-left: 10px;
+      transition: background-color 0.3s;
+    }
+
+    .search-button:hover, .mic-button:hover, .add-button:hover {
+      background-color: #a100ff;
+    }
+
+    .search-button img, .mic-button img, .add-button img {
+      width: 25px;
+      height: 25px;
+      object-fit: contain;
+    }
+
+    /* History Section */
+    .history {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      width: 80%;
+      background-color: #1b2a41;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .history-item {
+      color: white;
+      margin: 5px 0;
+      cursor: pointer;
+    }
+
+    .history-item:hover {
+      text-decoration: underline;
+    }
+
+    /* Menu Styles */
+    .menu {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      padding: 10px;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    }
+
+    .menu.show {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+      text-decoration: none;
+      color: white;
+      transition: transform 0.2s ease;
+    }
+
+    .menu-item:hover {
+      transform: scale(1.1);
+    }
+
+    .menu-item-icon {
+      width: 50px;
+      height: 50px;
+      margin-right: 10px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .menu-item-icon img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+    }
+
+    .menu-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      z-index: 1100;
+    }
+
+    .menu-toggle:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .menu-toggle img {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">AskFusion</div>
+
+  <!-- Search Bar with Icons -->
+  <div class="search-container">
+    <input type="text" class="search-bar" id="searchBar" placeholder="Search...">
+    <button class="search-button" id="searchButton">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/search.png" alt="Search">
+    </button>
+    <button class="mic-button" id="micButton">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/microphone.png" alt="Mic">
+    </button>
+    <button class="add-button" id="addButton">
+      <img src="https://img.icons8.com/ios-filled/50/ffffff/plus.png" alt="Add Shortcut">
+    </button>
+  </div>
+
+  <!-- Search History -->
+  <div class="history" id="historyContainer">
+    <h3>Search History:</h3>
+    <div id="historyList"></div>
+  </div>
+
+  <!-- Menu Toggle -->
+  <div class="menu-toggle" id="menuToggle">
+    <img src="https://img.icons8.com/ios-filled/50/ffffff/menu-2.png" alt="Menu">
+  </div>
+
+  <!-- Menu -->
+  <div class="menu" id="menu">
+    <a href="https://www.youtube.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #FF0000;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/youtube-play.png" alt="YouTube">
+      </div>
+      YouTube
+    </a>
+    <a href="https://www.facebook.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #1877F2;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/facebook.png" alt="Facebook">
+      </div>
+      Facebook
+    </a>
+    <a href="https://www.instagram.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #E4405F;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/instagram-new.png" alt="Instagram">
+      </div>
+      Instagram
+    </a>
+    <a href="https://drive.google.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #4285F4;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/google-drive.png" alt="Google Drive">
+      </div>
+      Google Drive
+    </a>
+    <a href="https://mail.google.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #D93025;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/gmail-new.png" alt="Gmail">
+      </div>
+      Gmail
+    </a>
+    <a href="https://chat.openai.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #00A8E8;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/chatgpt.png" alt="ChatGPT">
+      </div>
+      ChatGPT
+    </a>
+    <a href="https://meet.google.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #00897B;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/google-meet.png" alt="Google Meet">
+      </div>
+      Google Meet
+    </a>
+    <a href="https://zoom.us" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #2D8CFF;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/zoom.png" alt="Zoom">
+      </div>
+      Zoom
+    </a>
+    <a href="https://www.linkedin.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #0A66C2;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/linkedin.png" alt="LinkedIn">
+      </div>
+      LinkedIn
+    </a>
+    <a href="https://github.com" class="menu-item">
+      <div class="menu-item-icon" style="background-color: #24292F;">
+        <img src="https://img.icons8.com/ios-filled/50/ffffff/github.png" alt="GitHub">
+      </div>
+      GitHub
+    </a>
+  </div>
+
+  <script>
+    // Menu Toggle
+    const menuToggle = document.getElementById("menuToggle");
+    const menu = document.getElementById("menu");
+
+    menuToggle.addEventListener("click", () => {
+      menu.classList.toggle("show");
+    });
+
+    // Close Menu When Clicking Outside
+    window.addEventListener("click", (event) => {
+      if (!menu.contains(event.target) && !menuToggle.contains(event.target)) {
+        menu.classList.remove("show");
+      }
+    });
+
+    // Handle Search Button Click
+    const searchButton = document.getElementById("searchButton");
+    searchButton.addEventListener("click", () => {
+      performSearch();
+    });
+
+    // Handle Enter key for search
+    document.getElementById("searchBar").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        performSearch();
+      }
+    });
+
+    // Perform search and save history
+    function performSearch() {
+      const query = document.getElementById("searchBar").value;
+      if (query) {
+        window.open(`https://www.google.com/search?q=${query}`, '_blank');
+        addToHistory(query);
+      }
+    }
+
+    // Handle Microphone Button for Voice Search
+    const micButton = document.getElementById("micButton");
+    const searchBar = document.getElementById("searchBar");
+
+    micButton.addEventListener("click", () => {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        const speech = event.results[0][0].transcript;
+        searchBar.value = speech;
+      };
+    });
+
+    // Add Shortcut (Save query to localStorage and show in history)
+    const addButton = document.getElementById("addButton");
+    addButton.addEventListener("click", () => {
+      const query = document.getElementById("searchBar").value;
+      if (query) {
+        alert(`Shortcut for "${query}" added (functionality placeholder).`);
+        addToHistory(query);
+      }
+    });
+
+    // Function to add search to history
+    function addToHistory(query) {
+      const historyContainer = document.getElementById("historyList");
+      const historyItem = document.createElement("div");
+      historyItem.className = "history-item";
+      historyItem.textContent = query;
+      historyItem.onclick = () => {
+        window.open(`https://www.google.com/search?q=${query}`, '_blank');
+      };
+      historyContainer.appendChild(historyItem);
+
+      // Save to localStorage
+      let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
+      history.push(query);
+      localStorage.setItem("searchHistory", JSON.stringify(history));
+    }
+
+    // Load saved search history on page load
+    window.onload = () => {
+      const savedHistory = JSON.parse(localStorage.getItem("searchHistory")) || [];
+      savedHistory.forEach(query => addToHistory(query));
+    };
+  </script>
+</body>
+</html>
